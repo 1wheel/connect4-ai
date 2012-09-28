@@ -51,8 +51,12 @@ function startNewGameClick(){
 //called by game object when it has data to send out
 function sendStateToServer(boardString){
 	bstr=boardString;
+	if (JSON.parse(boardString).blackTurn == "true"){
+		runAlphabeta();
+	}
+	else{
 	sendStateToGame(boardString);
-	//gapi.hangout.data.submitDelta({boardString: boardString})
+	}
 }
 
 //passes updated state to gameboard
