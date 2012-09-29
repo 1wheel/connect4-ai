@@ -3,17 +3,12 @@ var lastPause;
 function runAI(boardString, turn, aiType, aiTimer){
 	if (!Game.gameOver){
 		var boardState = JSON.parse(boardString);
-		var position = JSON.parse(boardState.cArray);
-		for (var x = 0; x < 8; x++){
-			for (var y = 0; y < 8; y++){
-				position[x][y] = (position[x][y] == 2) ? -1 : position[x][y];
-			}
-		}
+		var position = changeFrom2(JSON.parse(boardState.cArray));
 
 		if (aiType == 1){
 			//console.log("negamax started " + turn);
 			lastPause =  new Date().getTime();
-			var depth = 2;
+			var depth = 1;
 			while (new Date().getTime() - lastPause < aiTimer/7){
 				depth++;
 				var result = negamax(position,depth,turn);
@@ -23,13 +18,14 @@ function runAI(boardString, turn, aiType, aiTimer){
 		if (aiType == 2){
 			//console.log("alphabeta started " + turn);
 			lastPause =  new Date().getTime();
-			var depth = 2;
-			while (new Date().getTime() - lastPause < aiTimer/7){
+			var depth = 1;
+			var result = {value: 0};
+			while (new Date().getTime() - lastPause < aiTimer/7 && result.value!=500){
 				depth++;
 				var alpha = {value: -1000, move: 0};
 				var beta = {value: 1000, move: 0};
 
-				var result = alphabeta(position,depth,turn,alpha.clone(),beta.clone());
+				result = alphabeta(position,depth,turn,alpha.clone(),beta.clone());
 				for (var i = 0; i < HHR.length; i++){
 					for (var j = 0; j < HHR.length; j++){
 						HHR[i][j] = Math.min(Math.floor(HHR[i][j]/2),32);
@@ -40,8 +36,19 @@ function runAI(boardString, turn, aiType, aiTimer){
 			//console.log(JSON.stringify(HHR));
 		}
 
+		if (turn==1){
+			redDepth += depth;
+			redMoves++;
+		}		
+		else{
+			yellowDepth += depth;
+			yellowMoves++;
+		}
+
 		var delay = new Date().getTime() - lastPause;
-		console.log("turn " + turn + " move " + result.move + "  score " + result.value + " depth " + depth + " time " + delay);
+		if (document.getElementById("stepMenu").selectedIndex != 0){
+			console.log("turn " + turn + " move " + result.move + "  score " + result.value + " depth " + depth + " time " + delay);
+		}
 		//console.log("depth of " + depth + " after " + delay);
 		if (result.move != undefined){
 			Game.botMove(result.move);
@@ -105,21 +112,24 @@ function alphabeta(position, depth, turn, alpha, beta) {
 	var result;
 
 	var moveOrder = HHsort(position, turn);
+	//console.log(moveOrder);
 	for (var i = 0; i<8; i++){
 		tempPosition = doMove(position.clone(),moveOrder[i],turn);
 		if (tempPosition ){
-			result = alphabeta(tempPosition, depth-1,-turn,-beta.clone(),-alpha.clone());
+			//console.log("going back with move " + moveOrder[i]);
+			result = alphabeta(tempPosition, depth-1,-turn,{value: -beta.value, move: beta.move},{value: -alpha.value, move: alpha.move});
 			result.value = -result.value;
 			result.move = moveOrder[i];
-			alpha = (alpha.value>result.value) ? alpha : result.clone();
-			if (alpha.value >= beta.value){
-				return beta.clone();
+			//console.log("move " + result.move + " v " + result.value + " >? " + alpha.value + "  current best value is " + alpha.move);
+			if (result.value>alpha.value){
+				//console.log("alpha value updated");
+				alpha = {value: result.value, move: moveOrder[i], depth: result.depth};
 			}
-
-			if (Math.abs(result.value) == 500 && result.value == result.value){
-				if ( (result.depth - alpha.depth)*(result.value/500) < 0) {
-					alpha = result.clone();
-				}
+			if (alpha.value >= beta.value){
+				//console.log("beta sent back");
+				//console.log(alpha);
+				//console.log(beta);
+				return beta;
 			}
 		}
 	}
@@ -139,8 +149,9 @@ function updateHH(position, depth, turn, x){
 
 //returns best move order, based on HH table
 function HHsort(position, turn){
-			//return randomPermutation(8);
-
+	//return [0,1,2,3,4,5,6,7];
+	//return randomPermutation(8);
+	//console.log("hh");
 	var rv = [];
 	var tempHH = (turn==1) ? HHR.clone() : HHY.clone();
 	for (var i = 0; i< 8; i++){
@@ -317,6 +328,7 @@ function print2D (A){
 
 var HHR = [];
 var HHY = [];
+
 for (var x = 0; x<8; x++){
 	HHR[x] = [];
 	HHY[x] = [];

@@ -6,11 +6,18 @@
 
 	<body id="body" onResize = "">    
 	<div id='gameSettings'>
-		Red Player:
+		Red Player: &nbsp&nbsp&nbsp&nbsp
 		<select id = "redMenu">
 			<option>Human</option>
 			<option>negamax</option>
 			<option>alphabeta</option>
+		</select>
+		Calc Time in ms:
+		<select id = "redCalc">
+			<option>100</option>
+			<option>500</option>
+			<option>5000</option>
+			<option>20000</option>
 		</select>
 		<br/>Yellow Player:
 		<select id = "yellowMenu">
@@ -18,19 +25,33 @@
 			<option>negamax</option>
 			<option>alphabeta</option>
 		</select>
-		<br/>Calculation Time in ms:
-		<select id = "calcMenu">
+		Calc Time in ms:
+		<select id = "yellowCalc">
 			<option>100</option>
 			<option>500</option>
 			<option>5000</option>
 			<option>20000</option>
 		</select>
 		<br/>
+		Number of Games to Play:
+		<select id = "stepMenu">
+			<option>Auto Play</option>
+			<option>One Game at Time</option>
+			<option>Step Click Between AI Moves</option>
+		</select>
+		<br/>
 		<input type='button' value='Start Game' onclick='startNewGameClick();'></input>
 		<input type='button' value='Step' id='stepButton' onclick=''></input>
 	</div>
     <canvas id="board" width="400" height="400"> </canvas>    
+    <br/>Total Red Wins:  &nbsp&nbsp&nbsp<span id='redWins'>0</span>
+    <br/>Total Yellow Wins: <span id='yellowWins'>0</span>
+
+    <br/>Red Adverage Depth:  &nbsp&nbsp&nbsp<span id='redAvgDepth'>0</span>
+    <br/>Yellow Adverage Depth: <span id='yellowAvgDepth'>0</span>
+
     <div id='info'><div>
+
 
 
 </body>​

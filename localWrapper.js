@@ -12,7 +12,15 @@ var bstr;
 var redPlayer;
 var yellowPlayer;
 var timerArray = [100,500,5000,20000];
-var aiTimer;
+var aiRedTimer;
+var aiYellowTimer;
+
+var redWins = 0;
+var yellowWins = 0;
+var yellowMoves = 0 ;
+var redMoves = 0;
+var yellowDepth = 0;
+var redDepth = 0;
 //contains game state and methods
 var Game;
 
@@ -23,10 +31,13 @@ function updateInfoDisplay() {
 function startNewGameClick(){
 	redPlayer = document.getElementById("redMenu").selectedIndex;
 	yellowPlayer = document.getElementById("yellowMenu").selectedIndex;
-	aiTimer = timerArray[document.getElementById("calcMenu").selectedIndex];
+	aiRedTimer = timerArray[document.getElementById("redCalc").selectedIndex];
+	aiYellowTimer = timerArray[document.getElementById("yellowCalc").selectedIndex];
+	stepRequired = (document.getElementById("stepMenu").selectedIndex == 2);
 	Game = new FourInARow();
 	setupCanvasObjects();
 	Game.startGame();
+	Game.drawBoard();
 	document.getElementById("info").innerHTML = ""; 
 }
 
@@ -37,10 +48,10 @@ function sendStateToServer(boardString){
 		if (JSON.parse(boardString).blackTurn == "true"){
 			if (redPlayer != 0){
 				if (stepRequired) {
-					document.getElementById("stepButton").onclick = function () {runAI(bstr, 1, redPlayer, aiTimer);};
+					document.getElementById("stepButton").onclick = function () {runAI(bstr, 1, redPlayer, aiRedTimer);};
 				}
 				else {
-					setTimeout('runAI(bstr, 1, redPlayer, aiTimer)',10);
+					setTimeout('runAI(bstr, 1, redPlayer, aiRedTimer)',10);
 				}
 				return;
 			}
@@ -48,10 +59,10 @@ function sendStateToServer(boardString){
 		else{
 			if (yellowPlayer != 0){
 				if (stepRequired) {
-					document.getElementById("stepButton").onclick =  function () {runAI(bstr,-1, yellowPlayer, aiTimer);};
+					document.getElementById("stepButton").onclick =  function () {runAI(bstr, -1, yellowPlayer, aiYellowTimer);};
 				}
 				else {
-					setTimeout('runAI(bstr, -1, yellowPlayer, aiTimer)',10);
+					setTimeout('runAI(bstr, -1, yellowPlayer, aiYellowTimer)',10);
 				}
 				return;
 			}
@@ -85,6 +96,21 @@ function isPlayerTurn(color) {
 function gameEnded(winnerText){
 	infoDisplay = winnerText;
 	document.getElementById("info").innerHTML = infoDisplay; 
+	if (infoDisplay == "Red Wins!") {
+		document.getElementById("redWins").innerHTML = ++redWins;
+	} 
+	else {
+		document.getElementById("yellowWins").innerHTML = ++yellowWins;		
+	}
+
+	document.getElementById("redAvgDepth").innerHTML = redDepth/redMoves;		
+	document.getElementById("yellowAvgDepth").innerHTML = yellowDepth/yellowMoves;		
+
+
+	if (document.getElementById("stepMenu").selectedIndex == 0){
+		startNewGameClick();
+	}
+
 }
 
 //creates on context object and listener
@@ -95,4 +121,5 @@ function setupCanvasObjects() {
 	//listens for clicks on the board	
 	board.addEventListener("mousedown",sendClickToGame,false);
 }
+
 
