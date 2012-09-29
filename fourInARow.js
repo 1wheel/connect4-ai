@@ -118,12 +118,13 @@ function FourInARow(){
 					this.drawBoard();
 					this.blackTurn = !this.blackTurn;
 					
-					//uploads newboard state
-					this.callSendState();
-
 					if (this.checkGameEnd(x,y)) {
 						this.endGame();
 					}
+
+					//uploads newboard state
+					this.callSendState();
+
 				}
 			}
 		}
@@ -213,6 +214,31 @@ function FourInARow(){
 			return { x: curleft, y: curtop };
 		}
 		return undefined;
+	}
+
+	this.botMove = function(x){
+		var color = (this.blackTurn) ? 1 : 2;
+		var y = this.maxY(x);
+		//if click is on the board, see if it is valid move
+		if (y >= 0) {
+			//checks to see if it is the local player's turn
+			if (!this.gameOver) {
+
+				this.cArray[x][y] = color;
+				this.drawBoard();
+				this.blackTurn = !this.blackTurn;
+				
+				//uploads newboard state
+				this.callSendState();
+
+				if (this.checkGameEnd(x,y)) {
+					this.endGame();
+				}
+			}
+		}
+		else {
+			console.log("bot selected invalid move");
+		}
 	}
 
 }

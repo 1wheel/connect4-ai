@@ -5,34 +5,14 @@ var board;			//canva
 var context;		//canvas context
 var container;		//holds color score, player names and join button
 
+var stepRequired = false;
+
 var bstr;
 
-var gameList = ["Checkers", "Dots", "Reversi", "Four in a Row"];
-var gameFunctionList = ["Checkers", "Dots", "Reversi", "FourInARow"];
-var dropDownMenu;
-var lastSelection = 0;
-createDropDownMenu(lastSelection);
-function createDropDownMenu(selectedID){
-	dropDownMenu = "";
-	for (var i = 0; i < gameList.length; i++){
-		if (i == selectedID) {
-			dropDownMenu += '<option selected = "selected" value="' + gameList[i] + '">' + gameList[i] +'</option>';
-		}
-		else{
-		dropDownMenu += '<option value="' + gameList[i] + '">' + gameList[i] +'</option>';
-		}
-	}
-	dropDownMenu = '<select  id="gameMenu">' + dropDownMenu + '</select>';
-}
-
-
-var startGameButton = "<input type='button' value='Play' onclick='startNewGameClick();' />";
-var startGameHTML = startGameButton + " a game of " + dropDownMenu;
-
-//displays below game canvas
-var infoDisplay = startGameHTML;
-updateInfoDisplay();
-
+var redPlayer;
+var yellowPlayer;
+var timerArray = [100,500,5000,20000];
+var aiTimer;
 //contains game state and methods
 var Game;
 
@@ -41,22 +21,46 @@ function updateInfoDisplay() {
 }
 
 function startNewGameClick(){
-	var selectedGame = gameFunctionList[document.getElementById("gameMenu").selectedIndex];
-	lastSelection = document.getElementById("gameMenu").selectedIndex;
-	eval("Game = new " + selectedGame +"();");
+	redPlayer = document.getElementById("redMenu").selectedIndex;
+	yellowPlayer = document.getElementById("yellowMenu").selectedIndex;
+	aiTimer = timerArray[document.getElementById("calcMenu").selectedIndex];
+	Game = new FourInARow();
 	setupCanvasObjects();
 	Game.startGame();
+	document.getElementById("info").innerHTML = ""; 
 }
 
 //called by game object when it has data to send out
 function sendStateToServer(boardString){
-	bstr=boardString;
-	if (JSON.parse(boardString).blackTurn == "true"){
-		runAlphabeta();
-	}
-	else{
+	if (!Game.gameOver){
+		bstr = boardString;
+		if (JSON.parse(boardString).blackTurn == "true"){
+			if (redPlayer != 0){
+				if (stepRequired) {
+					document.getElementById("stepButton").onclick = function () {runAI(bstr, 1, redPlayer, aiTimer);};
+				}
+				else {
+					setTimeout('runAI(bstr, 1, redPlayer, aiTimer)',10);
+				}
+				return;
+			}
+		}
+		else{
+			if (yellowPlayer != 0){
+				if (stepRequired) {
+					document.getElementById("stepButton").onclick =  function () {runAI(bstr,-1, yellowPlayer, aiTimer);};
+				}
+				else {
+					setTimeout('runAI(bstr, -1, yellowPlayer, aiTimer)',10);
+				}
+				return;
+			}
+
+		}
+	//next move not a bot, let player pick
 	sendStateToGame(boardString);
-	}
+}
+	
 }
 
 //passes updated state to gameboard
@@ -69,13 +73,17 @@ function sendClickToGame(e) {
 }
 
 function isPlayerTurn(color) {
-	return true;
+	if (color == 1 && redPlayer == 0){
+		return true;
+	}
+	if (color == 2 && yellowPlayer == 0){
+		return true;
+	}
 }
 
 //updates info div with winner info and button to start new game
 function gameEnded(winnerText){
-	createDropDownMenu(lastSelection);
-	infoDisplay = winnerText + startGameButton + " a new game of " + dropDownMenu;
+	infoDisplay = winnerText;
 	document.getElementById("info").innerHTML = infoDisplay; 
 }
 
@@ -88,5 +96,3 @@ function setupCanvasObjects() {
 	board.addEventListener("mousedown",sendClickToGame,false);
 }
 
-document.getElementById("gameMenu").selectedIndex = 3;
-startNewGameClick();

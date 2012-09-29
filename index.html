@@ -5,9 +5,32 @@
 </head>
 
 	<body id="body" onResize = "">    
-	<div id='info'></div>
+	<div id='gameSettings'>
+		Red Player:
+		<select id = "redMenu">
+			<option>Human</option>
+			<option>negamax</option>
+			<option>alphabeta</option>
+		</select>
+		<br/>Yellow Player:
+		<select id = "yellowMenu">
+			<option>Human</option>
+			<option>negamax</option>
+			<option>alphabeta</option>
+		</select>
+		<br/>Calculation Time in ms:
+		<select id = "calcMenu">
+			<option>100</option>
+			<option>500</option>
+			<option>5000</option>
+			<option>20000</option>
+		</select>
+		<br/>
+		<input type='button' value='Start Game' onclick='startNewGameClick();'></input>
+		<input type='button' value='Step' id='stepButton' onclick=''></input>
+	</div>
     <canvas id="board" width="400" height="400"> </canvas>    
-
+    <div id='info'><div>
 
 
 </body>​
